@@ -53,8 +53,9 @@ def add_entry_post():
     
 @app.route("/entry/id", methods=["GET"])
 def id_entry_get():
-    entry = session.query(Entry.title, Entry.content).filter(Entry.id==id)
+    entry = session.query(Entry)
     return render_template("id_entry.html", entry=entry)
+    
     
 
         
