@@ -3,6 +3,7 @@ from flask import render_template,request,redirect, url_for
 from blog import app
 from .database import session, Entry
 
+
 PAGINATE_BY =10
     
 
@@ -37,6 +38,7 @@ def entries(page=1):
 def add_entry_get():
     return render_template("add_entry.html")
     
+    
 @app.route("/entry/add", methods=["POST"])
 def add_entry_post():
     entry=Entry(
@@ -47,3 +49,12 @@ def add_entry_post():
     session.add(entry)
     session.commit()
     return redirect(url_for("entries"))
+    
+    
+@app.route("/entry/id", methods=["GET"])
+def id_entry_get():
+    entry = session.query(Entry.title, Entry.content).filter(Entry.id==id)
+    return render_template("id_entry.html", entry=entry)
+    
+
+        
