@@ -58,17 +58,18 @@ def id_entry_get(id):
     
 @app.route("/entry/<int:id>/edit", methods=["GET", "POST"])
 def edit_entry(id):
-    entry=session.query(Entry).get(id)
-    if request.method == "POST":
-               entry=Entry(
-               title=request.form["title"],
-               content=request.form["content"],
-               )
-               session.add(entry)
-               session.commit()
-               return redirect(url_for("entries"))
-    elif request.method=="GET":
+    entry = session.query(Entry).get(id)
+    entry_new=Entry(
+         title=request.form["title"],
+         content=request.form["content"],
+         )
+    if entry_new != entry:
+       session.add(entry_new)
+       session.commit()
+       return redirect(url_for("entries"))
+    else:
         return render_template("add_entry.html", entry=entry)
-        
+       
+       
       
     
