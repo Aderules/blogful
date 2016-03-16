@@ -50,7 +50,7 @@ def add_entry_post():
     session.commit()
     return redirect(url_for("entries"))
     
-    
+
 @app.route("/entry/<int:id>")
 def id_entry_get(id):
     entry = session.query(Entry).get(id)
@@ -71,4 +71,3 @@ def edit_entry(id):
         return render_template("add_entry.html", entry=entry)
         
       
-    
