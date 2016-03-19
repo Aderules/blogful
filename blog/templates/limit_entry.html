@@ -1,0 +1,13 @@
+{% import  "macros.html" as macros %}
+{% extends "base.html" %}
+{% block content %}
+
+<form method="POST">
+    <legend> Entries per page: </legend>
+    <select <select name="limit">
+        <option value= 20 >20</option>
+    </select>
+<input type="submit">
+</form>
+
+{% endblock %}

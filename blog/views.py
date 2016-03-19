@@ -1,7 +1,9 @@
-from flask import render_template,request,redirect, url_for
+from flask import render_template,request,redirect, url_for,flash
+from flask.ext.login import login_user, login_required, current_user, logout_user
+from werkzeug.security import check_password_hash
 
 from blog import app
-from .database import session, Entry
+from .database import session, Entry, User
 
 
 PAGINATE_BY =10
@@ -35,15 +37,18 @@ def entries(page=1):
          )
     
 @app.route("/entry/add", methods=["GET"])
+@login_required
 def add_entry_get():
     return render_template("add_entry.html")
     
     
 @app.route("/entry/add", methods=["POST"])
+@login_required
 def add_entry_post():
     entry=Entry(
         title=request.form["title"],
         content=request.form["content"],
+        author=current_user
     )
     
     session.add(entry)
@@ -56,18 +61,74 @@ def id_entry_get(id):
     entry = session.query(Entry).get(id)
     return render_template("id_entry.html", entry=entry)
     
+
+
 @app.route("/entry/<int:id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_entry(id):
     entry=session.query(Entry).get(id)
     if request.method == "POST":
-               entry=Entry(
-               title=request.form["title"],
-               content=request.form["content"],
-               )
-               session.add(entry)
-               session.commit()
-               return redirect(url_for("entries"))
-    elif request.method=="GET":
-        return render_template("add_entry.html", entry=entry)
-        
-      
+        if entry.author==current_user:
+                 entry=Entry(
+                       title=request.form["title"],
+                       content=request.form["content"],
+                 )
+                 session.add(entry)
+                 session.commit()
+                 flash("Entry has been saved")
+                 return redirect(url_for("entries"))
+        flash("You are not authorised to make changes on this entry","danger")
+    return render_template("edit_entry.html", entry_title=entry.title, entry_content=entry.title)
+    # how can i ensure that even if a user does not make changes when editing and submits it does not create a new entry?
+    
+
+
+#delete each entry, "Get" method in instance where value of "answer" is "no" uses default external "Get" method    
+@app.route("/entry/<int:id>/delete", methods =["GET", "POST"])
+@login_required
+def delete_entry(id):
+    entry = session.query(Entry).get(id)
+    if  request.method == "POST":
+        if entry.author==current_user:
+            if request.form["answer"]=="yes":
+                session.delete(entry)
+                session.commit()
+                flash("Entry has been deleted","danger")
+           #flash("Entry {}" has been deleted.format(entry.title))- why does this give an invaild syntax error?
+                return redirect(url_for("entries"))
+        flash("You are not authorised to make changes on this entry","danger")            
+    return render_template("delete_entry.html", entry=entry)
+    
+  
+    
+#@app.route("/?limit=20")
+#@app.route("/page/2?limit=20")
+#def limit_page():# provide default value for limit
+    #print request.args.get('limit') == 20:
+        #return render_template("limit_entry.html")
+
+
+
+@app.route("/login", methods=["GET"])
+def login_get():
+    return render_template("login.html")
+    
+    
+@app.route("/login", methods=["POST"])
+def login_post():
+    email=request.form["email"]
+    password=request.form["password"]
+    user=session.query(User).filter_by(email=email).first()
+    if not user or not check_password_hash(user.password, password):
+              flash("Incorrect username or password", "danger")
+              return redirect( url_for("login_get"))
+              
+    login_user(user)
+    return redirect(request.args.get('next') or url_for("entries"))
+
+@app.route("/logout", methods=["GET"])
+def logout_get():
+    return redirect(url_for ("login_get"))
+    
+
+    
