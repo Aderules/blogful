@@ -77,7 +77,7 @@ def edit_entry(id):
                  )
                  session.add(entry)
                  session.commit()
-                 flash("Entry has been saved")
+                 flash("Entry has been saved", "danger")
                  return redirect(url_for("entries"))
         flash("You are not authorised to make changes on this entry","danger")
     return render_template("edit_entry.html", entry_title=entry.title, entry_content=entry.content)
