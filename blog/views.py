@@ -57,6 +57,7 @@ def add_entry_post():
     
 
 @app.route("/entry/<int:id>")
+@login_required
 def id_entry_get(id):
     entry = session.query(Entry).get(id)
     return render_template("id_entry.html", entry=entry)
@@ -72,14 +73,15 @@ def edit_entry(id):
                  entry=Entry(
                        title=request.form["title"],
                        content=request.form["content"],
+                       author=current_user
                  )
                  session.add(entry)
                  session.commit()
                  flash("Entry has been saved")
                  return redirect(url_for("entries"))
         flash("You are not authorised to make changes on this entry","danger")
-    return render_template("edit_entry.html", entry_title=entry.title, entry_content=entry.title)
-    # how can i ensure that even if a user does not make changes when editing and submits it does not create a new entry?
+    return render_template("edit_entry.html", entry_title=entry.title, entry_content=entry.content)
+    
     
 
 
@@ -94,7 +96,6 @@ def delete_entry(id):
                 session.delete(entry)
                 session.commit()
                 flash("Entry has been deleted","danger")
-           #flash("Entry {}" has been deleted.format(entry.title))- why does this give an invaild syntax error?
                 return redirect(url_for("entries"))
         flash("You are not authorised to make changes on this entry","danger")            
     return render_template("delete_entry.html", entry=entry)
