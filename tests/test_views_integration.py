@@ -43,21 +43,25 @@ class TestViews(unittest.TestCase):
         self.assertEqual(entry.content, "Test content")
         self.assertEqual(entry.author, self.user)
         
-     def test_edit_entry(self):
+    def test_edit_entry(self):
         self.stimulate_login()
+        self.test_add_entry()
         
-        response = self.client.get("/entry/<int:id>/edit", data={"title": "Test Entry", "content": "Test content"})
-        
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(urlparse(response.location).path, "/")
         entries = session.query(Entry).all()
         self.assertEqual(len(entries), 1)
-        
-        entry = entries[0]
-        self.assertEqual(entry.title, "Test Entry")
-        self.assertEqual(entry.content, "Test content")
+        entry=entries[0]
+
+
+        response = self.client.post("/entry/<int:id>/edit", data={"title": "Edit Entry", "content": "Edit content"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(urlparse(response.location).path, "/")
+    
+       
         self.assertEqual(entry.author, self.user)
-        
+        self.assertEqual(entry.title,"Edit Entry")
+        self.assertEqual(entry.content, "Edit content")
+        self.assertEqual(entry.id, id)
+
         
     
     def tearDown(self):

@@ -69,20 +69,19 @@ def id_entry_get(id):
 def edit_entry(id):
     entry=session.query(Entry).get(id)
     if request.method == "POST":
-        if entry.author==current_user:
-                 entry=Entry(
-                       title=request.form["title"],
-                       content=request.form["content"],
-                       author=current_user
-                 )
-                 session.add(entry)
-                 session.commit()
-                 flash("Entry has been saved", "danger")
-                 return redirect(url_for("entries"))
+        if entry.author == current_user:
+                entry.title = request.form["title"],
+                entry.content=request.form["content"],
+                entry.id= id
+                entry.author==current_user
+                session.add(entry)
+                session.commit()
+                flash("Entry has been saved", "success")
+                return redirect(url_for("entries"))
         flash("You are not authorised to make changes on this entry","danger")
     return render_template("edit_entry.html", entry_title=entry.title, entry_content=entry.content)
     
-    
+
 
 
 #delete each entry, "Get" method in instance where value of "answer" is "no" uses default external "Get" method    
@@ -95,7 +94,7 @@ def delete_entry(id):
             if request.form["answer"]=="yes":
                 session.delete(entry)
                 session.commit()
-                flash("Entry has been deleted","danger")
+                flash("Entry has been deleted","success")
                 return redirect(url_for("entries"))
         flash("You are not authorised to make changes on this entry","danger")            
     return render_template("delete_entry.html", entry=entry)
