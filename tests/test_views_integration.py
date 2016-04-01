@@ -67,25 +67,12 @@ class TestViews(unittest.TestCase):
         self.assertEqual(entry.content, "Test Edit content")
         self.assertEqual(entry.id, 1)
         
-    def test_edit_inaccessible_entry(self):
-        self.stimulate_login()
-        #create test entry
-        response = self.client.post("/entry/add", data={"title": "Test Entry", "content": "Test content"})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(urlparse(response.location).path, "/")
-        entries = session.query(Entry).all()
-        self.assertEqual(len(entries), 1)
+   # def test_edit_unauthorised_entry(self):
+       # self.stimulate_login("Bob")
         
-        entry = entries[0]
-        #query existing entry
-        entries = session.query(Entry).get(1)
-        response = self.client.post("/entry/1/edit", data={"title": "Test Edit Entry", "content": "Test Edit content"})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(urlparse(response.location).path, "/")
-        
-       #test entry is being accessed by illegal user
-        self.assertNotEqual(entry.author, "Bob")
-
+        #response = self.client.post("/entry/1/edit", data={"title": "Test Edit Entry", "content": "Test Edit content"})
+       # self.assertEqual(response.status_code, 403)
+       
     
     def test_delete_entry(self):
        self.stimulate_login()
@@ -100,11 +87,10 @@ class TestViews(unittest.TestCase):
        entry = entries[0]
         
       #delete entry
-       response = self.client.post("/entry/1/delete", follow_redirects=True)
-       self.assertEqual(response.status_code,400)
-      # self.assertEqual(urlparse(response.location).path, "/")
+       response = self.client.post("/entry/1/delete")
+       self.assertEqual(response.status_code, 302)
        self.assertEqual(entry.author, self.user)
-       #entries = session.query(Entry).get(1)
+       entries = session.query(Entry).all()
        self.assertEqual(len(entries),0)
        
        
