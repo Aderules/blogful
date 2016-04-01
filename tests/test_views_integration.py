@@ -7,8 +7,10 @@ from werkzeug.security import generate_password_hash
 #Configure your app to use the testing database
 os.environ["CONFIG_PATH"] = "blog.config.TestingConfig"
 
+
 from blog import app
 from blog.database import Base, engine, session, User, Entry
+from flask import flash
 
 class TestViews(unittest.TestCase):
     def setUp(self):
@@ -44,25 +46,69 @@ class TestViews(unittest.TestCase):
         self.assertEqual(entry.author, self.user)
         
     def test_edit_entry(self):
+        #Check that entries can be edited
         self.stimulate_login()
-        self.test_add_entry()
-        
-        entries = session.query(Entry).all()
-        self.assertEqual(len(entries), 1)
-        entry=entries[0]
-
-
-        response = self.client.post("/entry/<int:id>/edit", data={"title": "Edit Entry", "content": "Edit content"})
+        #create test entry
+        response = self.client.post("/entry/add", data={"title": "Test Entry", "content": "Test content"})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(urlparse(response.location).path, "/")
-    
-       
-        self.assertEqual(entry.author, self.user)
-        self.assertEqual(entry.title,"Edit Entry")
-        self.assertEqual(entry.content, "Edit content")
-        self.assertEqual(entry.id, id)
-
+        entries = session.query(Entry).all()
+        self.assertEqual(len(entries), 1)
         
+        entry = entries[0]
+        #edit entry
+        response = self.client.post("/entry/1/edit", data={"title": "Test Edit Entry", "content": "Test Edit content"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(urlparse(response.location).path, "/")
+        
+       #test entry is edited
+        self.assertEqual(entry.author,self.user)
+        self.assertEqual(entry.title,"Test Edit Entry")
+        self.assertEqual(entry.content, "Test Edit content")
+        self.assertEqual(entry.id, 1)
+        
+    def test_edit_inaccessible_entry(self):
+        self.stimulate_login()
+        #create test entry
+        response = self.client.post("/entry/add", data={"title": "Test Entry", "content": "Test content"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(urlparse(response.location).path, "/")
+        entries = session.query(Entry).all()
+        self.assertEqual(len(entries), 1)
+        
+        entry = entries[0]
+        #query existing entry
+        entries = session.query(Entry).get(1)
+        response = self.client.post("/entry/1/edit", data={"title": "Test Edit Entry", "content": "Test Edit content"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(urlparse(response.location).path, "/")
+        
+       #test entry is being accessed by illegal user
+        self.assertNotEqual(entry.author, "Bob")
+
+    
+    def test_delete_entry(self):
+       self.stimulate_login()
+       #add entry
+       response = self.client.post("/entry/add", data={"title": "Test Entry", "content": "Test content"})
+       self.assertEqual(response.status_code, 302)
+       self.assertEqual(urlparse(response.location).path, "/")
+       #confirm entry has been added
+       entries = session.query(Entry).all()
+       self.assertEqual(len(entries), 1)
+        
+       entry = entries[0]
+        
+      #delete entry
+       response = self.client.post("/entry/1/delete", follow_redirects=True)
+       self.assertEqual(response.status_code,400)
+      # self.assertEqual(urlparse(response.location).path, "/")
+       self.assertEqual(entry.author, self.user)
+       #entries = session.query(Entry).get(1)
+       self.assertEqual(len(entries),0)
+       
+       
+    
     
     def tearDown(self):
         """ Test teardown """
