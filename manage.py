@@ -22,8 +22,8 @@ def run():
 @manager.command
 def seed():
     content = """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-               Ut enim ad minim veniam, quis nostrud exercitation ullamo laboris nisi ut aliquip ex ea commode consequat.Duis aute irure dolor in 
-               reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidate non proident, sunt in 
+              # Ut enim ad minim veniam, quis nostrud exercitation ullamo laboris nisi ut aliquip ex ea commode consequat.Duis aute irure dolor in 
+              # reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidate non proident, sunt in 
                culpa qui deserunt mollit amim id est laborum"""
     
     for i in range(25):
