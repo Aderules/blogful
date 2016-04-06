@@ -91,7 +91,6 @@ def delete_entry(id):
     entry = session.query(Entry).get(id)
     if  request.method == "POST":
         if entry.author==current_user:
-            if request.form["answer"]=="yes":
                 session.delete(entry)
                 session.commit()
                 flash("Entry has been deleted","success")

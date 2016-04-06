@@ -25,13 +25,13 @@ class TestViews(unittest.TestCase):
         session.add(self.user)
         session.commit()
         
-    def stimulate_login(self):
+    def simulate_login(self):
         with self.client.session_transaction() as http_session:
             http_session["user_id"] = str(self.user.id)
             http_session["_fresh"] = True
     
     def test_add_entry(self):
-        self.stimulate_login()
+        self.simulate_login()
         
         response = self.client.post("/entry/add", data={"title": "Test Entry", "content": "Test content"})
         
@@ -47,7 +47,7 @@ class TestViews(unittest.TestCase):
         
     def test_edit_entry(self):
         #Check that entries can be edited
-        self.stimulate_login()
+        self.simulate_login()
         #create test entry
         response = self.client.post("/entry/add", data={"title": "Test Entry", "content": "Test content"})
         self.assertEqual(response.status_code, 302)
@@ -75,23 +75,27 @@ class TestViews(unittest.TestCase):
        
     
     def test_authorised_delete_entry(self):
-       self.stimulate_login()
+       self.simulate_login()
        #add entry
        response = self.client.post("/entry/add", data={"title": "Test Entry", "content": "Test content"})
-       #self.assertEqual(response.status_code, 302)
-      # self.assertEqual(urlparse(response.location).path, "/")
+       self.assertEqual(response.status_code, 302)
+       self.assertEqual(urlparse(response.location).path, "/")
       
        #confirm entry has been added
        entries = session.query(Entry).all()
-       entry=entries[0]
-       #self.assertEqual(len(entries), 1)
-       self.assertEqual(entry.author, self.user) 
+       self.assertEqual(len(entries), 1)
+      
+      
       #delete entry
+       entry=entries[0]
+       self.assertEqual(entry.author, self.user) 
        response = self.client.post("/entry/1/delete")
        self.assertEqual(response.status_code, 302)
+       self.assertEqual(urlparse(response.location).path, "/")
        entries = session.query(Entry).all()
        self.assertEqual(len(entries), 0)
-       
+      
+
     
       # self.assertEqual(entry.title, "[]")
       # self.assertEqual(entry.content, "[]")
