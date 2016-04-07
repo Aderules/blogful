@@ -87,7 +87,7 @@ class TestViews(unittest.TestCase):
       
       
       #delete entry
-       entry=entries[0]
+       entry=entries [0]
        self.assertEqual(entry.author, self.user) 
        response = self.client.post("/entry/1/delete")
        self.assertEqual(response.status_code, 302)
@@ -97,9 +97,6 @@ class TestViews(unittest.TestCase):
       
 
     
-      # self.assertEqual(entry.title, "[]")
-      # self.assertEqual(entry.content, "[]")
-       
       
 
     
