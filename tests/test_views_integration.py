@@ -1,10 +1,12 @@
 import os
 import unittest
-from urllib.parse import urlparse
+try: from urllib.parse import urlparse
+except ImportError: from urlparse import urlparse # Python 2 compatibility
+
 
 from werkzeug.security import generate_password_hash
 
-#Configure your app to use the testing database
+#Configure app to use the testing database
 os.environ["CONFIG_PATH"] = "blog.config.TestingConfig"
 
 
